@@ -99,6 +99,7 @@ class I18nRouter extends Router
      */
     public function generate($name, $parameters = array(), $referenceType = self::ABSOLUTE_PATH)
     {
+
         // determine the most suitable locale to use for route generation
         $currentLocale = $this->context->getParameter('_locale');
         if (isset($parameters['_locale'])) {
@@ -125,6 +126,8 @@ class I18nRouter extends Router
         }
 
         try {
+        	//var_dump($locale.I18nLoader::ROUTING_PREFIX.$name);
+
             $url = $generator->generate($locale.I18nLoader::ROUTING_PREFIX.$name, $parameters, $referenceType);
 
             if ($needsHost && $this->hostMap) {
@@ -139,6 +142,8 @@ class I18nRouter extends Router
 
             // fallback to default behavior
         }
+
+
 
         // use the default behavior if no localized route exists
         return $generator->generate($name, $parameters, $referenceType);
@@ -156,7 +161,15 @@ class I18nRouter extends Router
     {
         $collection = parent::getRouteCollection();
 
-        return $this->container->get($this->i18nLoaderId)->load($collection);
+		$currentLocale = $this->context->getParameter('_locale');
+
+		if ($currentLocale) {
+			$locale = $currentLocale;
+		} else {
+			$locale = $this->defaultLocale;
+		}
+
+        return $this->container->get($this->i18nLoaderId)->load($collection, $locale);
     }
 
     public function getOriginalRouteCollection()
@@ -194,18 +207,24 @@ class I18nRouter extends Router
 
             if (!($currentLocale = $this->context->getParameter('_locale'))
                     && null !== $request) {
-                $currentLocale = $this->localeResolver->resolveLocale(
+
+
+
+				$currentLocale = $this->localeResolver->resolveLocale(
                     $request, $params['_locales']
                 );
 
-                // If the locale resolver was not able to determine a locale, then all efforts to
+				// If the locale resolver was not able to determine a locale, then all efforts to
                 // make an informed decision have failed. Just display something as a last resort.
                 if (!$currentLocale) {
                     $currentLocale = reset($params['_locales']);
                 }
             }
 
+
             if (!in_array($currentLocale, $params['_locales'], true)) {
+
+
                 // TODO: We might want to allow the user to be redirected to the route for the given locale if
                 //       it exists regardless of whether it would be on another domain, or the same domain.
                 //       Below we assume that we do not want to redirect always.

@@ -20,7 +20,8 @@ namespace JMS\I18nRoutingBundle\Router;
 
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Routing\Route;
-use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\Routing\RouteCollection as SymfonyRouteCollection;
+use JMS\I18nRoutingBundle\Router\RouteCollection;
 use JMS\I18nRoutingBundle\Util\RouteExtractor;
 use Symfony\Component\Config\Loader\LoaderResolver;
 
@@ -42,9 +43,9 @@ class I18nLoader
         $this->patternGenerationStrategy = $patternGenerationStrategy;
     }
 
-    public function load(RouteCollection $collection)
+    public function load(SymfonyRouteCollection $collection, $locale)
     {
-        $i18nCollection = new RouteCollection();
+        $i18nCollection = new RouteCollection($locale);
         foreach ($collection->getResources() as $resource) {
             $i18nCollection->addResource($resource);
         }
@@ -73,6 +74,8 @@ class I18nLoader
                     $i18nCollection->add($locale.I18nLoader::ROUTING_PREFIX.$name, $localeRoute);
                 }
             }
+
+			$i18nCollection->add($name, $route);
         }
 
         return $i18nCollection;
